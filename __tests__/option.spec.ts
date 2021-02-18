@@ -49,4 +49,27 @@ describe('Option', () => {
       }),
     ).toEqual('None');
   });
+
+  it('replace', () => {
+    const some = Some(1);
+
+    expect(some.replace(5)).toEqual(Some(1));
+    expect(some.unwrap()).toEqual(5);
+  });
+
+  it('map', () => {
+    const some = Some('pepega');
+    expect(some.map(c => c.toUpperCase())).toEqual(Some('PEPEGA'));
+
+    const none = None();
+    expect(None().map(value => !!value)).toEqual(None());
+  });
+
+  it('filter', () => {
+    const some = Some(4);
+    expect(some.filter(num => num % 2 == 0).unwrap()).toEqual(4);
+
+    const none = None();
+    expect(none.filter(value => !!value)).toEqual(None());
+  });
 });

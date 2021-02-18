@@ -62,6 +62,30 @@ export class Option<T> {
     return this.value;
   }
 
+  public filter<P extends (val: T) => boolean>(predicate: P): Option<T> {
+    if (this.isNone()) {
+      return None();
+    }
+    const cloned = this.clone();
+    if (predicate(cloned)) {
+      return Some(cloned);
+    }
+
+    return None();
+  }
+
+  public replace(newValue: T): Option<T> {
+    const oldValue = this.clone();
+    this.value = newValue;
+    return Some(oldValue);
+  }
+
+  public map<U, F extends (val: T) => U>(fn: F): Option<U> {
+    if (this.isNone()) return None();
+
+    return Some(fn(this.clone()));
+  }
+
   public toString(): string {
     if (this.isNone()) {
       return 'None';
