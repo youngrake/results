@@ -72,4 +72,12 @@ describe('Option', () => {
     const none = None();
     expect(none.filter(value => !!value)).toEqual(None());
   });
+
+  it('toString', () => {
+    const some = Some(4);
+    expect(some.toString()).toEqual('Some(4)');
+
+    const none = None();
+    expect(none.toString()).toEqual('None');
+  });
 });

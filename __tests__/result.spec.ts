@@ -35,10 +35,50 @@ describe('Result', () => {
     expect(okNoneResult.err()).toEqual(Some('Error'));
   });
 
+  it('match', () => {
+    const ok = Ok(5);
+
+    expect(
+      ok.match({
+        ok: num => num,
+        err: _ => 'Error',
+      }),
+    ).toEqual(5);
+
+    const err = Err(5);
+
+    expect(
+      err.match({
+        ok: num => num,
+        err: _ => 'Error',
+      }),
+    ).toEqual('Error');
+  });
+
   it('expect', () => {
     expect(Ok(5).expect("It's okay")).toEqual(5);
 
     expect(Err('Error').expect).toThrowError();
+  });
+
+  it('expectErr', () => {
+    expect(Err(5).expectErr("It's okay")).toEqual(5);
+
+    expect(Ok(5).expectErr).toThrowError();
+  });
+
+  it('contains', () => {
+    expect(Ok(5).contains(5)).toBeTruthy();
+    expect(Ok(1).contains(222)).toBeFalsy();
+
+    expect(Err('Error').contains('Error')).toBeFalsy();
+  });
+
+  it('containsErr', () => {
+    expect(Err(5).containsErr(5)).toBeTruthy();
+    expect(Err(5).containsErr(1)).toBeFalsy();
+
+    expect(Ok(1).containsErr(2)).toBeFalsy();
   });
 
   it('unwrap', () => {
@@ -73,5 +113,30 @@ describe('Result', () => {
     ).toEqual(10);
 
     expect(Err('Error').map(value => value * 2).unwrap).toThrowError();
+  });
+
+  it('mapErr', () => {
+    expect(
+      Err(5)
+        .mapErr(value => value * 2)
+        .unwrapErr(),
+    ).toEqual(10);
+
+    expect(Ok(10).mapErr(value => value * 2).unwrap).toThrowError();
+  });
+
+  it('flatten', () => {
+    expect(Ok(5).flatten()).toEqual(Ok(5));
+    expect(Ok(Ok(10)).flatten()).toEqual(Ok(10));
+
+    expect(Err(15).flatten()).toEqual(Err(15));
+  });
+
+  it('toString', () => {
+    const ok = Ok(5);
+    expect(ok.toString()).toEqual('Ok(5)');
+
+    const err = Err(10);
+    expect(err.toString()).toEqual('Err(10)');
   });
 });

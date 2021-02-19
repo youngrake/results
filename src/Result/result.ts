@@ -1,3 +1,4 @@
+import { unwrapFailed } from './../errors';
 import { copy } from '../helpers';
 
 import { ResultType } from './values';
@@ -49,18 +50,57 @@ export class Result<T, E> {
     return Some(this.error);
   }
 
+  public match<Ok, Err>({ ok, err }: MatchResult<T, E, Ok, Err>): Ok | Err | null {
+    if (this.isOk()) {
+      return ok ? ok(this.cloneOk()) : null;
+    }
+
+    return err ? err(this.cloneErr()) : null;
+  }
+
   public expect(message = ''): T {
     if (this.isErr()) {
-      throw new TypeError(message);
+      unwrapFailed(message, this.error);
     }
 
     return this.value;
   }
 
+  public expectErr(message = ''): E {
+    if (this.isOk()) {
+      unwrapFailed(message, this.value);
+    }
+
+    return this.error;
+  }
+
+  public cloneOk(): T {
+    return copy(this.value);
+  }
+
+  public cloneErr(): E {
+    return copy(this.error);
+  }
+
+  public contains<U extends any>(x: U): boolean {
+    if (this.isOk()) {
+      return this.value == x;
+    }
+
+    return false;
+  }
+
+  public containsErr<F extends any>(f: F): boolean {
+    if (this.isErr()) {
+      return this.error == f;
+    }
+
+    return false;
+  }
+
   public unwrap(): T {
     if (this.isErr()) {
-      // TODO: unwrapFailed(message: string, error: Error)
-      throw new TypeError('called `unwrap()` on an `Err` value');
+      unwrapFailed('called `unwrap()` on an `Err` value', this.error);
     }
 
     return this.value;
@@ -68,8 +108,7 @@ export class Result<T, E> {
 
   public unwrapErr(): E {
     if (this.isOk()) {
-      // TODO: unwrapFailed(message: string, error: Error)
-      throw new TypeError('called `Result::unwrap_err()` on an `Ok` value');
+      unwrapFailed('called `unwrap_err()` on an `Ok` value', this.value);
     }
 
     return this.error;
@@ -97,6 +136,46 @@ export class Result<T, E> {
     }
 
     return new Err(this.error);
+  }
+
+  public mapErr<F, O extends (val: E) => F>(op: O): Result<T, F> {
+    if (this.isOk()) {
+      return new Ok(this.value);
+    }
+
+    return new Err(op(this.error));
+  }
+
+  public mapOr<U, F extends (val: T) => U>(defaultValue: U, fn: F): U {
+    if (this.isOk()) {
+      return fn(this.value);
+    }
+
+    return defaultValue;
+  }
+
+  public mapOrElse<U, D extends (val: E) => U, F extends (val: T) => U>(defaultFn: D, fn: F): U {
+    if (this.isOk()) {
+      return fn(this.value);
+    }
+
+    return defaultFn(this.error);
+  }
+
+  public flatten(): Result<T, E> {
+    if (this.isErr()) {
+      return new Err(this.error);
+    }
+
+    if (this.value instanceof Result) {
+      return this.value;
+    }
+
+    return new Ok(this.cloneOk());
+  }
+
+  public toString(): string {
+    return this.isOk() ? `Ok(${this.value.toString()})` : `Err(${this.error.toString()})`;
   }
 }
 
