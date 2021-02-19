@@ -31,6 +31,15 @@ export class Option<T> {
     return !this.isSome();
   }
 
+  /**
+   * UNSAFE
+   */
+  public insert(val: T): Option<T> {
+    this.value = val;
+
+    return this;
+  }
+
   public match<Some, None>({ some, none }: MatchOption<T, Some, None>): Some | None | null {
     if (this.isNone()) {
       return none ? none() : null;
@@ -59,6 +68,7 @@ export class Option<T> {
     if (this.isNone()) {
       throw new Error(message);
     }
+
     return this.value;
   }
 
@@ -66,6 +76,7 @@ export class Option<T> {
     if (this.isNone()) {
       return None();
     }
+
     const cloned = this.clone();
     if (predicate(cloned)) {
       return Some(cloned);
@@ -81,9 +92,55 @@ export class Option<T> {
   }
 
   public map<U, F extends (val: T) => U>(fn: F): Option<U> {
-    if (this.isNone()) return None();
+    if (this.isNone()) {
+      return None();
+    }
 
     return Some(fn(this.clone()));
+  }
+
+  public mapOr<U, F extends (val: T) => U>(defaultValue: U, fn: F): U {
+    if (this.isNone()) {
+      return defaultValue;
+    }
+
+    return fn(this.clone());
+  }
+
+  public mapOrElse<U, D extends () => U, F extends (val: T) => U>(defaultFn: D, fn: F): U {
+    if (this.isNone()) {
+      return defaultFn();
+    }
+
+    return fn(this.clone());
+  }
+
+  public flatten(): Option<T> {
+    if (this.isNone()) {
+      return None();
+    }
+
+    if (this.value instanceof Option) {
+      return this.value;
+    }
+
+    return Some(this.value);
+  }
+
+  public and<U>(optb: Option<U>): Option<U> {
+    if (this.isSome()) {
+      return optb;
+    }
+
+    return None();
+  }
+
+  public andThen<U, F extends (val: T) => Option<U>>(fn: F): Option<U> {
+    if (this.isSome()) {
+      return fn(this.clone());
+    }
+
+    return None();
   }
 
   public toString(): string {
