@@ -162,6 +162,22 @@ export class Result<T, E> {
     return defaultFn(this.error);
   }
 
+  public and<U>(res: Result<U, E>): Result<U, E> {
+    if (this.isOk()) {
+      return res;
+    }
+
+    return new Err(this.cloneErr());
+  }
+
+  public andThen<U, F extends (val: T) => Result<U, E>>(op: F): Result<U, E> {
+    if (this.isOk()) {
+      return op(this.cloneOk());
+    }
+
+    return new Err(this.cloneErr());
+  }
+
   public flatten(): Result<T, E> {
     if (this.isErr()) {
       return new Err(this.error);
