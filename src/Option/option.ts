@@ -2,6 +2,7 @@ import { OptionType } from '../types.d';
 import { Some, None } from './values';
 
 import { copy } from '../helpers';
+import { expectFailed } from '../errors';
 
 interface MatchOption<T, S, N> {
   some?: (some: T) => S;
@@ -66,7 +67,7 @@ export class Option<T> {
 
   public expect(message: string): T {
     if (this.isNone()) {
-      throw new Error(message);
+      expectFailed(message);
     }
 
     return this.value;

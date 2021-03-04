@@ -8,3 +8,7 @@ export class Panic extends Error {
 export const unwrapFailed = <T>(msg: string, value: T): void => {
   throw new Panic(`${msg}: ${JSON.stringify(value)}`);
 };
+
+export const expectFailed = (msg: string): void => {
+  throw new Panic(`${msg}`);
+};
