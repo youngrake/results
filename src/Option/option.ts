@@ -1,8 +1,9 @@
 import { OptionType } from '../types.d';
-import { Some, None } from './values';
 
 import { copy } from '../helpers';
-import { expectFailed } from '../errors';
+import { expectFailed, Panic } from '../errors';
+
+import { Some, None } from './values';
 
 interface MatchOption<T, S, N> {
   some?: (some: T) => S;
@@ -51,7 +52,7 @@ export class Option<T> {
 
   public unwrap(): T | never {
     if (this.isNone()) {
-      throw new TypeError('called `unwrap()` on a `None` value');
+      throw new Panic('called `unwrap()` on a `None` value');
     }
 
     return this.value;

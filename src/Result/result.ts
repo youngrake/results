@@ -1,8 +1,9 @@
-import { unwrapFailed } from './../errors';
+import { ResultVariations } from '../types.d';
+
+import { unwrapFailed } from '../errors';
 import { copy } from '../helpers';
 
 import { ResultType } from './values';
-import { ResultVariations } from './../types.d';
 import { Some, None, Option } from '../Option';
 
 interface MatchResult<T, E, Ok, Err> {
